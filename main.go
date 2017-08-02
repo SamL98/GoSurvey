@@ -1,40 +1,23 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
-	"sync"
-	"text/template"
+
+	"github.com/julienschmidt/httprouter"
+	_ "github.com/lib/pq"
 )
 
-type templateHandler struct {
-	once     sync.Once
-	filename string
-	text     string
-	s1       string
-	s2       string
-	templ    *template.Template
-}
-
-func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	t.once.Do(func() {
-		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
-	})
-	data := map[string]interface{}{
-		"Text": t.text,
-		"S1":   t.s1,
-		"S2":   t.s2,
-	}
-	t.templ.Execute(w, data)
-}
+var recallTexts []string
+var res Response
+var demoData map[string]map[string]interface{}
 
 func main() {
+	populateDemoData()
+
 	items := make(map[string]string)
 	for _, item := range os.Environ() {
 		splits := strings.Split(item, "=")
@@ -42,69 +25,62 @@ func main() {
 		val := splits[1]
 		items[key] = val
 	}
-	dbUrl := items["postgres_url"]
+	dbURL := items["postgres_url"]
 
-	db, err := sql.Open("postgres", dbUrl)
-	if err != nil {
-		log.Fatal("Error connecting to postgres", err)
+	pgManager = dbmanager{url: dbURL}
+	pgManager.OpenConnection()
+	defer pgManager.db.Close()
+
+	if success, err := pgManager.CheckConnection(); !success || err != nil {
+		log.Fatal("Error pinging postgres ", err)
+	}
+	log.Println("Successfully connected to Postgres.")
+
+	if err := pgManager.GetAllIPAddresses(); err != nil {
+		log.Fatal("Error getting IP addresses from postres ", err)
 	}
 
-	wave := 2
-	rows, err := db.Query("SELECT * FROM Responses WHERE wave=$1 ORDER BY random() LIMIT 1", wave)
-	if err != nil {
-		log.Fatal("Error querying random response from postgres", err)
-	}
-	defer rows.Close()
-
-	var id int
-	if err := rows.Scan(&id); err != nil {
-		log.Fatal("Error getting id from row", err)
+	res = Response{wave: 2}
+	if err := pgManager.GetRandomResponse(&res); err != nil {
+		log.Fatal("Error querying random row from postgres ", err)
 	}
 
-	if _, err := db.Query("DELETE * FROM Responses WHERE id=$1", id); err != nil {
-		log.Fatal("Error removing id from db", id, err)
-	}
+	/*if err := pgManager.DeleteRow(res.id); err != nil {
+		log.Fatal("Error deleting id from postgres ", res.id, err)
+	}*/
 
 	var addr = flag.String("addr", ":8080", "The addr of the application.")
 	flag.Parse()
 
-	http.Handle("/", &templateHandler{
-		filename: "intro.html",
-		text:     "",
-		s1:       "",
-		s2:       "",
-	})
+	texts := [4]string{"Text1. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
+		"Text2. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
+		"Text3. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
+		"Text4. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>"}
 
-	texts := [4]string{"Text1. S1: {{.S1}}. S2: {{.S2}}",
-		"Text2. S1: {{.S1}}. S2: {{.S2}}",
-		"Text3. S1: {{.S1}}. S2: {{.S2}}",
-		"Text4. S1: {{.S1}}. S2: {{.S2}}"}
-
-	var questions [4]question
-	for i := 1; i <= 4; i++ {
-		for j := 1; i <= 2; j++ {
-			col := fmt.Sprintf("q%ds%d", i, j)
-			if err := rows.Scan(&col); err != nil {
-				log.Fatal("Error getting column from row", col, err)
-			}
-			questions[i] = question{text: texts[i]}
-			if j == 1 {
-				questions[i].s1 = col
-			} else {
-				questions[i].s2 = col
-			}
-		}
+	for i := range res.questions {
+		res.questions[i].text = texts[i]
 	}
 
-	http.Handle("/q1", &templateHandler{
-		filename: "question.html",
-		text:     questions[0].text,
-		s1:       questions[0].s1,
-		s2:       questions[0].s2,
-	})
+	recallTexts = []string{"what percentage of Americans prefer to have a <u>female</u> boss?",
+		"what percentage of Americans prefer to have a <u>male</u> boss?",
+		"what percentage of Americans polled in 2015 reported <u>favoring</u>&nbsp;allowing gays and lesbians to marry?",
+		"According to one of the blog posts, what percentage of Americans polled in 2015 reported <u>opposing</u>&nbsp;allowing gays and lesbians to marry?",
+		"According to one of the blog posts, how many millions of Mexican immigrants lived in the United States in <u>2007</u>?",
+		"According to one of the blog posts, how many millions of Mexican immigrants lived in the United States in <u>2014</u>?",
+		"According to one of the blog posts, in 2016, 963 individuals were shot and killed by police. Of those shot, how many individuals were <u>white</u>?",
+		"According to one of the blog posts, in 2016, 963 individuals were shot and killed by police. Of those shot, how many individuals were <u>black</u>?"}
+
+	r := httprouter.New()
+	r.GET("/", Intro)
+	r.GET("/instructions", Instructions)
+	r.GET("/question/:q", QuestionHandler)
+	r.GET("/recall_instructions", RecallInstructions)
+	r.GET("/recall_question/:q", RecallQuestion)
+	r.GET("/recall_strength/:q", RecallStrength)
+	r.GET("/demographics/:type/:q", DemographicsQuestion)
 
 	log.Println("Starting web server on", *addr)
-	if err := http.ListenAndServe(*addr, nil); err != nil {
+	if err := http.ListenAndServe(*addr, r); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
