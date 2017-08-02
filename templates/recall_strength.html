@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Question</title>
+    </head>
+    <body>
+        <h3>How sure are you about this?</h3>
+        <input type="radio" name="strength">Not sure at all</input>
+        <input type="radio" name="strength">Slightly sure</input>
+        <input type="radio" name="strength">Moderately sure</input>
+        <input type="radio" name="strength">Very sure</input>
+        <input type="radio" name="strength">Extremely sure</input>
+        <button id="submit">Continue</button>
+    </body>
+</html>
+<script type="text/javascript">
+    document.getElementById('submit').addEventListener('click', e => {
+        let currNo = parseInt("{{.Number}}");
+        let nextNo = currNo + 1;
+        if (nextNo == 9) {
+            window.location.href = 'http://localhost:8080/demographics/mc/1';
+            return;
+        }
+        window.location.href = 'http://localhost:8080/recall_question/' + nextNo;
+    });
+</script>

@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <title>Question</title>
+    </head>
+    <body>
+        <h3>How interesting is this blog post?</h3>
+        <p>{{.Text}}</p>
+        <input type="radio" id="r1" name="interest">Interesting</input>
+        <input type="radio" id="r2" name="interest">Not Interesting</input>
+        <button id="submit">Continue</button>
+    </body>
+</html>
+<script>
+    window.onload = function() {
+        var interest = null;
+        document.getElementById('s1').innerHTML = "{{.S1}}";
+        document.getElementById('s2').innerHTML = "{{.S2}}";
+        document.getElementById('submit').addEventListener('click', e => {
+            if (interest == null || interest == undefined) {
+                alert('Please select whether or not this post is interesting before moving on.');
+                return;
+            }
+            next();
+        });
+        document.getElementById('r2').addEventListener('click', e => {
+            interest = 0;
+        })
+        document.getElementById('r1').addEventListener('click', e => {
+            interest = 1;
+        })
+        var next = function() {
+            var currNo = parseInt('{{.Number}}');
+            var nextNo = currNo + 1;
+            var location = 'http://localhost:8080/question/' + nextNo;
+
+            if (nextNo == 5) {
+                location = 'http://localhost:8080/recall_instructions';
+            }
+
+            if (interest) {
+                location += "?interest=" + interest;
+            }
+
+            window.location.href = location;
+        }
+        setTimeout(next, 15000);
+    }
+</script>

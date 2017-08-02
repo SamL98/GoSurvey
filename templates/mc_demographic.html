@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Demographics</title>
+    </head>
+    <body>
+        <h2 id="question">{{.Question}}</h2>
+        <div id="choices">
+        </div>
+        <button id="submit" onclick="location.href='http://localhost:8080/demographics/{{.NextType}}/{{.NextName}}';">Continue</button>
+    </body>
+</html>
+<script type="text/javascript">
+    window.onload = function() {
+        var choices = JSON.parse("{{.Choices}}");
+        var container = document.getElementById('choices');
+        for (var i = 0; choices.length; i++) {
+            choice = choices[i];
+            var newChoice = document.createElement('input');
+            newChoice.setAttribute('type', 'radio');
+            newChoice.setAttribute('name', 'type');
+            newChoice.innerHTML = choice;
+            container.appendChild(newChoice);
+        }
+    }
+</script>

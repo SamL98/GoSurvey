@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>Recall</title>
+    </head>
+    <body>
+        <p>According to one of the blog posts, {{.Text}}</p>
+        <input type="text" id="statistic"></input>
+        <button id="submit">Continue</button>
+    </body>
+</html>
+<script type="text/javascript">
+    document.getElementById('submit').addEventListener('click', e => {
+        let text = document.getElementById('statistic').value;
+        if (!text || text === '') {
+            alert('Please enter a response before moving on.');
+            return;
+        }
+
+        let statistic = encodeURI(text);
+        window.location.href = 'http://localhost:8080/recall_strength/{{.Number}}?s=' + statistic;
+    })
+</script>
