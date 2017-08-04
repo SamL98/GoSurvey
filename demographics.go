@@ -2,7 +2,7 @@ package main
 
 type Demographics struct {
 	sex         bool
-	age         int
+	age         int8
 	race        string
 	major       string
 	year        string

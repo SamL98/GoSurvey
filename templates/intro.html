@@ -188,6 +188,9 @@
     document.getElementById('accept').addEventListener('click', e => {
         accepted = true;
     });
+    document.getElementById('decline').addEventListener('click', e => {
+        accepted = false;
+    })
     document.getElementById('submit').addEventListener('click', e => {
         if (!accepted) {
             alert("Sorry. You must accept these terms to participate in the study.");

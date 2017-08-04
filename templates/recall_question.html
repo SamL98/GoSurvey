@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Recall</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     </head>
     <body>
         <p>According to one of the blog posts, {{.Text}}</p>
@@ -16,7 +17,9 @@
             return;
         }
 
+        $.post('http://localhost:8080/report_recall_statistic', text);
+
         let statistic = encodeURI(text);
-        window.location.href = 'http://localhost:8080/recall_strength/{{.Number}}?s=' + statistic;
+        window.location.href = 'http://localhost:8080/recall_strength/{{.Number}}';
     })
 </script>

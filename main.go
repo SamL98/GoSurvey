@@ -11,12 +11,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var currRes Response
+
 var recallTexts []string
 var res Response
 var demoData map[string]map[string]interface{}
+var knowledgeData map[string]map[string]interface{}
 
 func main() {
 	populateDemoData()
+	populateKnowledgeData()
 
 	items := make(map[string]string)
 	for _, item := range os.Environ() {
@@ -40,7 +44,17 @@ func main() {
 		log.Fatal("Error getting IP addresses from postres ", err)
 	}
 
-	res = Response{wave: 2}
+	currWave := 2
+	res = Response{wave: currWave}
+	currRes = Response{
+		wave: currWave + 1,
+		questions: []Question{
+			Question{}, Question{},
+			Question{}, Question{},
+		},
+		demographic: Demographics{},
+	}
+
 	if err := pgManager.GetRandomResponse(&res); err != nil {
 		log.Fatal("Error querying random row from postgres ", err)
 	}
@@ -78,6 +92,16 @@ func main() {
 	r.GET("/recall_question/:q", RecallQuestion)
 	r.GET("/recall_strength/:q", RecallStrength)
 	r.GET("/demographics/:type/:q", DemographicsQuestion)
+	r.GET("/knowledge_instructions", KnowledgeInstructions)
+	r.GET("/knowledge_question/:name", KnowledgeQuestion)
+	r.GET("/completed", CompletionHandler)
+
+	r.POST("/report_interest/:q", ParseInterest)
+	r.POST("/report_recall_statistic/:q", ParseStatistic)
+	r.POST("/report_recall_strength/:q", ParseRecallStrength)
+	r.POST("/report_mcdemographic/:name", ParseMCDemographic)
+	r.POST("report_textdemographic/:name", ParseTextDemographic)
+	r.POST("/report_knowledge/:name", ParseKnowledge)
 
 	log.Println("Starting web server on", *addr)
 	if err := http.ListenAndServe(*addr, r); err != nil {

@@ -1,10 +1,20 @@
 <html>
     <head>
         <title>Demographics</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     </head>
     <body>
         <h2>{{.Question}}</h2>
-        <input type="text"></input>
-        <button id="submit" onclick="'location.href=http://localhost:8080/demographics/{{.NextType}}/{{.NextName}}';">Continue</button>
+        <input id="answer" type="text"></input>
+        <button id="submit" onclick="">Continue</button>
     </body>
 </html>
+<script>
+    document.getElementById('submit').addEventListener('click', e => {
+        var text = document.getElementById('answer').value;
+        if (text && text == '') {
+            $.post('http://localhost:8080/report_textdemographic/{{.Name}}', text);
+        }
+        window.location.href = 'http://localhost:8080/demographics/{{.NextType}}/{{.NextName}}';
+    });
+</script>

@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>Knowledge</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <h2 id="question">{{.Question}}</h2>
+        <div id="choices">
+        </div>
+    </body>
+</html>
+<script type="text/javascript">
+    window.onload = function() {
+        var choices = JSON.parse("{{.Choices}}");
+        var container = document.getElementById('choices');
+        for (var i = 0; choices.length; i++) {
+            choice = choices[i];
+            var newChoice = document.createElement('input');
+            newChoice.setAttribute('type', 'radio');
+            newChoice.setAttribute('name', 'choice');
+            newChoice.setAttribute('value', '' + i);
+            newChoice.innerHTML = choice;
+            container.appendChild(newChoice);
+        }
+
+        document.getElementById('submit').addEventListener('click', e => {
+            let choice = $('input[name=\"choice\"]:checked').val();
+            if (!choice) {
+                alert("Please select an option for continuing.");
+                return;
+            }
+            $.post('http://localhost:8080/report_knowledge/{{.Name}}', '' + choice);
+
+            var nextName = '{{.Next}}';
+            if (nextName === 'none') {
+                window.location.href = 'http://localhost:8080/completed';
+                return;
+            }
+            window.location.href='http://localhost:8080/knowledge_question/{{.Next}}';
+        })
+    }
+</script>

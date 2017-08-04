@@ -1,20 +1,30 @@
 <html>
     <head>
         <title>Question</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     </head>
     <body>
         <h3>How sure are you about this?</h3>
-        <input type="radio" name="strength">Not sure at all</input>
-        <input type="radio" name="strength">Slightly sure</input>
-        <input type="radio" name="strength">Moderately sure</input>
-        <input type="radio" name="strength">Very sure</input>
-        <input type="radio" name="strength">Extremely sure</input>
+        <input type="radio" name="strength" value="0">Not sure at all</input>
+        <input type="radio" name="strength" value="1">Slightly sure</input>
+        <input type="radio" name="strength" value="2">Moderately sure</input>
+        <input type="radio" name="strength" value="3">Very sure</input>
+        <input type="radio" name="strength" value="4">Extremely sure</input>
         <button id="submit">Continue</button>
     </body>
 </html>
 <script type="text/javascript">
     document.getElementById('submit').addEventListener('click', e => {
         let currNo = parseInt("{{.Number}}");
+
+        let strength = $('input[name=\"strength\"]:checked').val();
+        if (!strength) {
+            alert("Please select an option before continuing.");
+            return;
+        }
+        
+        $.post('http://localhost:8080/report_recall_strength/' + currNo, '' + strength);
+
         let nextNo = currNo + 1;
         if (nextNo == 9) {
             window.location.href = 'http://localhost:8080/demographics/mc/1';

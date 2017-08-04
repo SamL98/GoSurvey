@@ -1,12 +1,12 @@
 <html>
     <head>
         <title>Demographics</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     </head>
     <body>
         <h2 id="question">{{.Question}}</h2>
         <div id="choices">
         </div>
-        <button id="submit" onclick="location.href='http://localhost:8080/demographics/{{.NextType}}/{{.NextName}}';">Continue</button>
     </body>
 </html>
 <script type="text/javascript">
@@ -17,9 +17,26 @@
             choice = choices[i];
             var newChoice = document.createElement('input');
             newChoice.setAttribute('type', 'radio');
-            newChoice.setAttribute('name', 'type');
+            newChoice.setAttribute('name', 'choice');
+            newChoice.setAttribute('value', '' + i);
             newChoice.innerHTML = choice;
             container.appendChild(newChoice);
         }
+
+        document.getElementById('submit').addEventListener('click', e => {
+            let choice = $('input[name=\"choice\"]:checked').val();
+            if (!choice) {
+                alert("Please select an option for continuing.");
+                return;
+            }
+            $.post('http://localhost:8080/report_mcdemographic/{{.Name}}', '' + choice);
+
+            var currName = '{{.Name}}';
+            if (currName === 'interest') {
+                window.location.href = 'http://localhost:8080/knowledge_instructions';
+                return;
+            }
+            window.location.href='http://localhost:8080/demographics/{{.NextType}}/{{.NextName}}';
+        })
     }
 </script>
