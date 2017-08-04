@@ -7,4 +7,5 @@ type Response struct {
 	start       int
 	questions   []Question
 	demographic Demographics
+	knowledge   Knowledge
 }

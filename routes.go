@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -123,7 +124,7 @@ func populateKnowledgeData() {
 		"Name":     "pm",
 		"Next":     "cons",
 	}
-	knowledgeDatap["cons"] = map[string]interface{}{
+	knowledgeData["cons"] = map[string]interface{}{
 		"Question": "Which of the two political parties is more conservative?",
 		"Choices":  []string{"Democrats", "Republicans"},
 		"Name":     "cons",
@@ -365,25 +366,27 @@ func ParseMCDemographic(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	bodyStr := string(body)
 
 	name := ps.ByName("name")
+
+	demoObj := demoData[name]["Choices"]
+	if reflect.TypeOf(demoObj).Kind() != reflect.Slice {
+		return
+	}
+	demoSlice := demoObj.([]string)
+
+	index := indexOf(bodyStr, demoSlice)
+	if index < 0 {
+		return
+	}
+
 	switch name {
 	case "sex":
-		if bodyStr == "Male" {
-			currRes.demographic.sex = false
-		} else {
-			currRes.demographic.sex = true
-		}
+		currRes.demographic.sex = index == 1
 	case "affiliation":
-		if index := indexOf(bodyStr, demoData[name]["Choices"]); index >= 0 {
-			currRes.demographic.affiliation = int8(index)
-		}
+		currRes.demographic.affiliation = int8(index)
 	case "ideology":
-		if index := indexOf(bodyStr, demoData[name]["Choices"]); index >= 0 {
-			currRes.demographic.ideology = int8(index)
-		}
+		currRes.demographic.ideology = int8(index)
 	case "interest":
-		if index := indexOf(bodyStr, demoData[name]["Choices"]); index >= 0 {
-			currRes.demographic.interest = int8(index)
-		}
+		currRes.demographic.interest = int8(index)
 	default:
 		break
 	}
@@ -416,7 +419,7 @@ func ParseTextDemographic(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}
 }
 
-func ParseKnowledge(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func ParseKnowledge(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal("Error reading body", err)
@@ -425,8 +428,36 @@ func ParseKnowledge(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 	bodyStr := string(body)
 
 	name := ps.ByName("name")
-	switch name {
+	knowObj := knowledgeData[name]["Choices"]
+	if reflect.TypeOf(knowObj).Kind() != reflect.Slice {
+		return
+	}
 
+	knowSlice := knowObj.([]string)
+	index := indexOf(name, knowSlice)
+	if index < 0 {
+		return
+	}
+
+	switch name {
+	case "majorities":
+		currRes.knowledge.majorities = int8(index)
+	case "majority":
+		currRes.knowledge.majority = index == 1
+	case "war":
+		currRes.knowledge.war = int8(index)
+	case "pence":
+		currRes.knowledge.pence = int8(index)
+	case "majWhip":
+		currRes.knowledge.majWhip = int8(index)
+	case "minWhip":
+		currRes.knowledge.minWhip = int8(index)
+	case "pm":
+		currRes.knowledge.pm = int8(index)
+	case "cons":
+		currRes.knowledge.cons = index == 1
+	default:
+		break
 	}
 }
 

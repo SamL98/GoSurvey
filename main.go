@@ -53,6 +53,7 @@ func main() {
 			Question{}, Question{},
 		},
 		demographic: Demographics{},
+		knowledge:   Knowledge{},
 	}
 
 	if err := pgManager.GetRandomResponse(&res); err != nil {
