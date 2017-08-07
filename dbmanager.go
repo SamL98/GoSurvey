@@ -31,26 +31,8 @@ func (m *dbmanager) CheckConnection() (success bool, err error) {
 	return true, nil
 }
 
-func (m *dbmanager) GetAllIPAddresses() error {
-	rows, err := m.db.Query("SELECT ip FROM Responses")
-	defer rows.Close()
-
-	if err != nil {
-		return err
-	}
-
-	for rows.Next() {
-		var ip string
-		if err := rows.Scan(&ip); err != nil {
-			log.Fatalln("Error scanning row for ip address.")
-		}
-		ips = append(ips, ip)
-	}
-	return nil
-}
-
 func (m *dbmanager) GetRandomResponse(r *Response) error {
-	rows, err := m.db.Query("SELECT wave, id FROM Responses WHERE wave=$1 ORDER BY random() LIMIT 1", r.wave)
+	rows, err := m.db.Query("SELECT wave, id, condition FROM Responses WHERE wave=$1 AND used=false ORDER BY random() LIMIT 1", r.wave)
 	defer rows.Close()
 
 	if err != nil {
@@ -61,7 +43,7 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 		return errors.New("zero rows from random response query")
 	}
 
-	if err := rows.Scan(&r.wave, &r.id); err != nil {
+	if err := rows.Scan(&r.wave, &r.id, &r.condition); err != nil {
 		return err
 	}
 
@@ -86,9 +68,39 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 	return nil
 }
 
-func (m *dbmanager) DeleteRow(id int) error {
-	if _, err := m.db.Query("DELETE FROM Responses WHERE id=$1", id); err != nil {
+func (m *dbmanager) MarkResponseAsUsed(id int) error {
+	if _, err := m.db.Query("UPDATE Responses SET used = true WHERE id=$1", id); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (m *dbmanager) AddResponse(r *Response, seed int) error {
+	if _, err := m.db.Query("INSERT INTO Responses (wave, used, seed) VALUES ($1, false, $2)", r.wave, seed); err != nil {
+		return err
+	}
+
+	rows, err := m.db.Query("SELECT id from Responses WHERE seed=$1", seed)
+	defer rows.Close()
+	if err != nil {
+		return err
+	}
+
+	if !rows.Next() {
+		return errors.New("zero rows from id fetch after response insertion")
+	}
+
+	var id int
+	if err := rows.Scan(&id); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(r.questions); i++ {
+		q := r.questions[i]
+		log.Println(q.number)
+		if _, err := m.db.Query("INSERT INTO Questions (response, time, number, interest) VALUES ($1, $2, $3, $4)", id, q.time, int(q.number)-1, q.interest); err != nil {
+			return err
+		}
 	}
 	return nil
 }

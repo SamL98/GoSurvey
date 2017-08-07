@@ -27,22 +27,22 @@
             next();
         });
         document.getElementById('r2').addEventListener('click', e => {
-            interest = 0;
+            interest = false;
         })
         document.getElementById('r1').addEventListener('click', e => {
-            interest = 1;
+            interest = true;
         })
         var next = function() {
             var currNo = parseInt('{{.Number}}');
             console.log(Date.now());
             console.log(Date.now() - start);
-            $.post('http://localhost:8080/report_interest/' + currNo, "\"interest\":" + (interest == null ? 0 : interest) + ",\"time\":" + (Date.now() - start));
+            $.post('http://localhost:8080/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
 
             var nextNo = currNo + 1;
             var location = 'http://localhost:8080/question/' + nextNo;
 
             if (nextNo == 5) {
-                location = 'http://localhost:8080/recall_instructions';
+                location = 'http://localhost:8080/completed';
             }
 
             window.location.href = location;
