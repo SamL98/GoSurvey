@@ -81,14 +81,18 @@ func CompletionHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 }
 
 func ParseInterest(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.Header.Add("Accept-Encoding", "identity")
+
 	index, err := strconv.ParseInt(ps.ByName("q"), 10, 64)
 	if err != nil {
-		log.Fatal("Error parsing question number from params", err)
+		log.Println("Error parsing question number from params ", err)
+		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal("Error reading body", err)
+		log.Println("Error reading body ", err)
+		return
 	}
 	defer r.Body.Close()
 	bodyStr := string(body)
