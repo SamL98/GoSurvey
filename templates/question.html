@@ -10,43 +10,41 @@
         <input type="radio" id="r2" name="interest">Not Interesting</input>
         <button id="submit">Continue</button>
     </body>
-</html>
-<script>
-    window.onload = function() {
-        var start = Date.now();
-        console.log(start);
-        var interest = null;
+    <script>
+        window.onload = function() {
+            var start = Date.now();
+            console.log(start);
+            var interest = null;
 
-        document.getElementById('s1').innerHTML = "{{.S1}}";
-        document.getElementById('s2').innerHTML = "{{.S2}}";
-        document.getElementById('submit').addEventListener('click', e => {
-            if (interest == null || interest == undefined) {
-                alert('Please select whether or not this post is interesting before moving on.');
-                return;
+            document.getElementById('s1').innerHTML = "{{.S1}}";
+            document.getElementById('s2').innerHTML = "{{.S2}}";
+            document.getElementById('submit').addEventListener('click', e => {
+                if (interest == null || interest == undefined) {
+                    alert('Please select whether or not this post is interesting before moving on.');
+                    return;
+                }
+                next();
+            });
+            document.getElementById('r2').addEventListener('click', e => {
+                interest = false;
+            })
+            document.getElementById('r1').addEventListener('click', e => {
+                interest = true;
+            })
+            var next = function() {
+                var currNo = parseInt('{{.Number}}');
+                $.post('{{.Host}}/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
+
+                var nextNo = currNo + 1;
+                var location = '{{.Host}}/question/' + nextNo;
+
+                if (nextNo == 5) {
+                    location = '{{.Host}}/completed';
+                }
+
+                window.location.href = location;
             }
-            next();
-        });
-        document.getElementById('r2').addEventListener('click', e => {
-            interest = false;
-        })
-        document.getElementById('r1').addEventListener('click', e => {
-            interest = true;
-        })
-        var next = function() {
-            var currNo = parseInt('{{.Number}}');
-            console.log(Date.now());
-            console.log(Date.now() - start);
-            $.post('{{.Host}}/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
-
-            var nextNo = currNo + 1;
-            var location = '{{.Host}}/question/' + nextNo;
-
-            if (nextNo == 5) {
-                location = '{{.Host}}/completed';
-            }
-
-            window.location.href = location;
+            setTimeout(next, 15000);
         }
-        setTimeout(next, 15000);
-    }
-</script>
+    </script>
+</html>
