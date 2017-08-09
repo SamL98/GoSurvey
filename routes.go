@@ -24,7 +24,10 @@ func Intro(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	t.templ.Execute(w, make(map[string]interface{}))
+	data := map[string]interface{}{
+		"Host": host,
+	}
+	t.templ.Execute(w, data)
 }
 
 func Instructions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -32,7 +35,10 @@ func Instructions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	t.templ.Execute(w, make(map[string]interface{}))
+	data := map[string]interface{}{
+		"Host": host,
+	}
+	t.templ.Execute(w, data)
 }
 
 func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -54,6 +60,7 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		"S1":     question.s1,
 		"S2":     question.s2,
 		"Number": index,
+		"Host":   host,
 	}
 	q.templ.Execute(w, data)
 }
@@ -68,6 +75,7 @@ func CompletionHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	}
 	data := map[string]interface{}{
 		"Condition": res.condition,
+		"Host":      host,
 	}
 	t.templ.Execute(w, data)
 }

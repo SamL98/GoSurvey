@@ -36,13 +36,13 @@
             var currNo = parseInt('{{.Number}}');
             console.log(Date.now());
             console.log(Date.now() - start);
-            $.post('http://localhost:8080/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
+            $.post('{{.Host}}/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
 
             var nextNo = currNo + 1;
-            var location = 'http://localhost:8080/question/' + nextNo;
+            var location = '{{.Host}}/question/' + nextNo;
 
             if (nextNo == 5) {
-                location = 'http://localhost:8080/completed';
+                location = '{{.Host}}/completed';
             }
 
             window.location.href = location;

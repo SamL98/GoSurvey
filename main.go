@@ -10,6 +10,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var host string
+
 var currRes Response
 
 var recallTexts []string
@@ -53,6 +55,12 @@ func main() {
 	addr := ":" + envPort
 	if envPort == "" {
 		addr = ":8080"
+	}
+
+	if addr == ":8080" {
+		host = "http://localhost:8080"
+	} else {
+		host = "https://social-transmission.herokuapp.com"
 	}
 
 	texts := [4]string{"Text1. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
