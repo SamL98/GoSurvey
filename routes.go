@@ -51,7 +51,7 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something went wrong. Sorry."))
-		log.Fatal("Error converting string to int ", ps.ByName("q"), err)
+		log.Println("Error converting string to int ", ps.ByName("q"), err)
 	}
 	question := res.questions[int(index)-1]
 

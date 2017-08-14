@@ -6,8 +6,10 @@
     <body>
         <h3>How interesting is this blog post?</h3>
         <p>{{.Text}}</p>
-        <input type="radio" id="r1" name="interest">Interesting</input>
-        <input type="radio" id="r2" name="interest">Not Interesting</input>
+        <div id="container">
+            <button class="intChoice" id="b1" name="interest">Interesting</input>
+            <button class="intChoice" id="b2" name="interest">Not Interesting</input>
+        </div>
         <button id="submit">Continue</button>
     </body>
 </html>
@@ -17,19 +19,37 @@
         console.log(start);
         var interest = null;
 
-        document.getElementById('s1').innerHTML = "{{.S1}}";
-        document.getElementById('s2').innerHTML = "{{.S2}}";
-        document.getElementById('submit').addEventListener('click', e => {
+        $('#s1').innerHTML = "{{.S1}}";
+        $('#s2').innerHTML = "{{.S2}}";
+        $('#submit').click(e => {
             if (interest == null || interest == undefined) {
                 alert('Please select whether or not this post is interesting before moving on.');
                 return;
             }
             next();
         });
-        document.getElementById('r2').addEventListener('click', e => {
+        $('#b2').click(e => {
+            $('#b1').css({
+                'background-color': 'white',
+                'color': 'black'
+            })
+            $('#b2').css({
+                'background-color': '#339966',
+                'color': 'white',
+                'opacity': '1.0'
+            })
             interest = false;
         })
-        document.getElementById('r1').addEventListener('click', e => {
+        $('#b1').click(e => {
+            $('#b2').css({
+                'background-color': 'white',
+                'color': 'black'
+            })
+            $('#b1').css({
+                'background-color': '#339966',
+                'color': 'white',
+                'opacity': '1.0'
+            })
             interest = true;
         })
         var next = function() {
@@ -48,3 +68,58 @@
         setTimeout(next, 15000);
     }
 </script>
+<style>
+    h3, p {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.25em;
+        margin-bottom: 40px;
+    }
+
+    body {
+        padding: 7.5% 20% 10% 20%;
+    }
+
+    #container {
+        width: 50%;
+        margin-bottom: 30px;
+        padding-left: 25%;
+        padding-right: 25%;
+    }
+
+    button {
+        font-size: 0.65em;
+        padding: 0;
+        border-radius: 5px;
+        width: 65px;
+        height: 40px;
+        box-shadow: 0 0 0 0;
+    }
+
+    .intChoice {
+        display: block;
+        margin-bottom: 5px;
+        height: 30px;
+        width: 100%;
+        padding: 0;
+        box-shadow: 0 0 0 0;
+        border-style: solid;
+        border-color: #339966;
+        background-color: white;
+        color: black;
+    }
+
+    #submit {
+        border: none;
+        background: none;
+        background-color: #339966;
+        color: white;
+        float: right;
+        cursor: pointer;
+    }
+
+    .intchoice:hover {
+        opacity: 0.65;
+        background-color: #339966;
+        color: white;
+    }
+</style>

@@ -5,8 +5,22 @@
     <body>
         <h1>Congratulations!</h1>
         <p>You have completed Part 1 of the study. Here is your condition number: </p>
-        <h3><strong>{{.Condition}}</strong></h3>
+        <h3 id="cond"><strong>{{.Condition}}</strong></h3>
         <p>Enter this number when prompted in the survey below:</p>
         <a href="">Part 2</a>
     </body>
 </html>
+<style>
+    h1, h3, p, a {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #cond {
+        margin: 30px 20px 30px 20px;
+        font-size: 3em;
+    }
+
+    body {
+        padding: 7.5% 20% 10% 20%;
+    }
+</style>

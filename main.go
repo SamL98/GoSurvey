@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
-	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	_ "github.com/lib/pq"
@@ -18,18 +16,14 @@ var recallTexts []string
 var res Response
 
 func main() {
-	items := make(map[string]string)
-	for _, item := range os.Environ() {
-		splits := strings.Split(item, "=")
-		key := splits[0]
-		val := splits[1]
-		items[key] = val
-	}
-	dbURL := items["postgres_url"]
-	envPort := items["PORT"]
+	envvars := getEnv()
+	dbURL := envvars["postgres_url"]
+	envPort := envvars["PORT"]
 
 	pgManager = dbmanager{url: dbURL}
-	pgManager.OpenConnection()
+	if success := pgManager.OpenConnection(); !success {
+		log.Fatal("Could not open connection to postgres")
+	}
 	defer pgManager.db.Close()
 
 	if success, err := pgManager.CheckConnection(); !success || err != nil {
@@ -45,20 +39,17 @@ func main() {
 	}
 
 	if err := pgManager.GetRandomResponse(&res); err != nil {
-		log.Fatal("Error querying random row from postgres ", err)
+		log.Println("Error querying random row from postgres ", err)
 	}
 
 	/*if err := pgManager.MarkResponseAsUsed(res.id); err != nil {
-		log.Fatal("Error marking id as used from postgres ", res.id, err)
+		log.Println("Error marking id as used from postgres ", res.id, err)
 	}*/
 
 	addr := ":" + envPort
 	if envPort == "" {
 		addr = ":8080"
-	}
-
-	if addr == ":8080" {
-		host = "http://localhost:8080"
+		host = "http://localhost" + addr
 	} else {
 		host = "https://social-transmission.herokuapp.com"
 	}

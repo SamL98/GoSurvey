@@ -16,12 +16,14 @@ type dbmanager struct {
 
 var pgManager dbmanager
 
-func (m *dbmanager) OpenConnection() {
+func (m *dbmanager) OpenConnection() bool {
 	db, err := sql.Open("postgres", m.url)
 	if err != nil {
-		log.Fatal("Error connecting to postgres ", err)
+		log.Println("Error connecting to postgres ", err)
+		return false
 	}
 	m.db = db
+	return true
 }
 
 func (m *dbmanager) CheckConnection() (success bool, err error) {
@@ -58,7 +60,7 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 	for rows.Next() {
 		q := Question{number: int8(i)}
 		if err := rows.Scan(&q.s1, &q.s2); err != nil {
-			log.Fatalln("Error scanning question row ", err)
+			log.Println("Error scanning question row ", err)
 		}
 		questions = append(questions, q)
 		i++
@@ -76,19 +78,12 @@ func (m *dbmanager) MarkResponseAsUsed(id int) error {
 }
 
 func (m *dbmanager) AddResponse(r *Response, seed int) error {
-	if _, err := m.db.Query("INSERT INTO Responses (wave, used, seed) VALUES ($1, false, $2)", r.wave, seed); err != nil {
-		return err
-	}
-
-	rows, err := m.db.Query("SELECT id from Responses WHERE seed=$1", seed)
-	defer rows.Close()
+	rows, err := m.db.Query("INSERT INTO Responses (wave, used, seed) VALUES ($1, false, $2) RETURNING id", r.wave, seed)
 	if err != nil {
 		return err
 	}
-
-	if !rows.Next() {
-		return errors.New("zero rows from id fetch after response insertion")
-	}
+	defer rows.Close()
+	rows.Next()
 
 	var id int
 	if err := rows.Scan(&id); err != nil {
