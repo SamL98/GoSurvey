@@ -92,7 +92,6 @@ func (m *dbmanager) AddResponse(r *Response, seed int) error {
 
 	for i := 0; i < len(r.questions); i++ {
 		q := r.questions[i]
-		log.Println(q.number)
 		if _, err := m.db.Query("INSERT INTO Questions (response, time, number, interest) VALUES ($1, $2, $3, $4)", id, q.time, int(q.number)-1, q.interest); err != nil {
 			return err
 		}

@@ -47,17 +47,17 @@ func main() {
 	}*/
 
 	addr := ":" + envPort
-	if envPort == "" {
+	if envPort == "" || envPort == "8080" {
 		addr = ":8080"
 		host = "http://localhost" + addr
 	} else {
 		host = "https://social-transmission.herokuapp.com"
 	}
 
-	texts := [4]string{"Text1. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
-		"Text2. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
-		"Text3. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>",
-		"Text4. S1: <span id=\"s1\"></span>. S2: <span id=\"s2\"></span>"}
+	texts := [4]string{"According to a recent poll, <span id=\"s1\"></span>% of Americans say that they would prefer working under a male boss. <span id=\"s2\"></span>% of Americans would prefer to work under a female boss.",
+		"Same sex marriage is a contested topic among Americans. In a poll conducted by the Pew Research Center, <span id=\"s1\"></span>% of respondents reported favoring same-sex marriage. <span id=\"s2\"></span>% reported opposing same-sex marriage.",
+		"According to a database compiled by The Washington Post, 963 individuals where killed by police in 2016. Of those shot, <span id=\"s1\"></span> individuals were white and <span id=\"s2\"></span> were black.",
+		"In 2007, <span id=\"s1\"></span> Mexican immigrants lived in the United States. In 2014, <span id=\"s2\"></span> Mexican immigrants lived in the US. Mexican immigrants have been at the center of one of the largest mass migrations in modern history."}
 
 	for i := range res.questions {
 		res.questions[i].text = texts[i]

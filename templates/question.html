@@ -16,11 +16,10 @@
 <script>
     window.onload = function() {
         var start = Date.now();
-        console.log(start);
         var interest = null;
 
-        $('#s1').innerHTML = "{{.S1}}";
-        $('#s2').innerHTML = "{{.S2}}";
+        $('#s1').html("{{.S1}}");
+        $('#s2').html("{{.S2}}");
         $('#submit').click(e => {
             if (interest == null || interest == undefined) {
                 alert('Please select whether or not this post is interesting before moving on.');
