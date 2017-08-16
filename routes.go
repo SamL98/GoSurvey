@@ -56,11 +56,17 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	question := res.questions[int(index)-1]
 
 	data := map[string]interface{}{
-		"Text":   question.text,
-		"S1":     question.s1,
-		"S2":     question.s2,
-		"Number": index,
-		"Host":   host,
+		"Text":       question.text,
+		"Index":      index,
+		"Distractor": question.distractor,
+		"Host":       host,
+		"NumQ":       len(res.questions),
+	}
+
+	if !question.distractor {
+		data["Number"] = question.number
+		data["S1"] = question.s1
+		data["S2"] = question.s2
 	}
 	q.templ.Execute(w, data)
 }
@@ -97,26 +103,24 @@ func ParseInterest(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	defer r.Body.Close()
 	bodyStr := string(body)
 
-	q := Question{number: int8(index)}
+	q := Question{number: int8(index), distractor: false}
 	items := strings.Split(bodyStr, ",")
+
 	for i := range items {
 		item := items[i]
 		splits := strings.Split(item, ":")
-		if splits[0] == "time" {
-			if timeSpent, err := strconv.ParseInt(splits[1], 10, 64); err != nil {
+		if splits[0] == "\"time\"" {
+			if timeSpent, err := strconv.ParseInt(splits[1], 10, 64); err == nil {
 				q.time = int(timeSpent)
+			} else {
+				log.Println("Error parsing int: ", err)
 			}
-		} else if splits[0] == "interest" {
-			if interest, err := strconv.ParseInt(splits[1], 10, 64); err != nil {
-				if int(interest) == 0 {
-					q.interest = false
-				} else {
-					q.interest = true
-				}
-			}
+		} else if splits[0] == "\"interest\"" {
+			q.interest = splits[1] == "true"
 		}
 	}
-	currRes.questions[int(index)-1] = q
+
+	currRes.targets[int(index)-1] = q
 }
 
 func parseInt(str string) (result int, err error) {

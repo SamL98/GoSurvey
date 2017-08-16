@@ -18,8 +18,11 @@
         var start = Date.now();
         var interest = null;
 
-        $('#s1').html("{{.S1}}");
-        $('#s2').html("{{.S2}}");
+        if ("{{.Distractor}}" === 'false') {
+            $('#s1').html("{{.S1}}");
+            $('#s2').html("{{.S2}}");
+        }
+
         $('#submit').click(e => {
             if (interest == null || interest == undefined) {
                 alert('Please select whether or not this post is interesting before moving on.');
@@ -52,13 +55,16 @@
             interest = true;
         })
         var next = function() {
-            var currNo = parseInt('{{.Number}}');
-            $.post('{{.Host}}/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
+            if ('{{.Distractor}}' === 'false') {
+                var currNo = parseInt('{{.Number}}');
+                $.post('{{.Host}}/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
+            }
 
-            var nextNo = currNo + 1;
+            var currIndex = parseInt('{{.Index}}');
+            var nextNo = currIndex + 1;
             var location = '{{.Host}}/question/' + nextNo;
 
-            if (nextNo == 5) {
+            if (nextNo > parseInt('{{.NumQ}}')) {
                 location = '{{.Host}}/completed';
             }
 
@@ -95,9 +101,10 @@
     }
 
     .intChoice {
+        font-size: 1em;
         display: block;
         margin-bottom: 5px;
-        height: 30px;
+        height: 40px;
         width: 100%;
         padding: 0;
         box-shadow: 0 0 0 0;

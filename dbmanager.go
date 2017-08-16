@@ -58,14 +58,14 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 	questions := []Question{}
 	i := 1
 	for rows.Next() {
-		q := Question{number: int8(i)}
+		q := Question{number: int8(i), distractor: false}
 		if err := rows.Scan(&q.s1, &q.s2); err != nil {
 			log.Println("Error scanning question row ", err)
 		}
 		questions = append(questions, q)
 		i++
 	}
-	r.questions = questions
+	r.targets = questions
 
 	return nil
 }
@@ -90,8 +90,8 @@ func (m *dbmanager) AddResponse(r *Response, seed int) error {
 		return err
 	}
 
-	for i := 0; i < len(r.questions); i++ {
-		q := r.questions[i]
+	for i := 0; i < len(r.targets); i++ {
+		q := r.targets[i]
 		if _, err := m.db.Query("INSERT INTO Questions (response, time, number, interest) VALUES ($1, $2, $3, $4)", id, q.time, int(q.number)-1, q.interest); err != nil {
 			return err
 		}
