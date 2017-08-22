@@ -27,6 +27,8 @@ func Intro(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := map[string]interface{}{
 		"Host": host,
 	}
+
+	GetResponse()
 	t.templ.Execute(w, data)
 }
 
@@ -54,6 +56,7 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		log.Println("Error converting string to int ", ps.ByName("q"), err)
 	}
 	question := res.questions[int(index)-1]
+	log.Println(question.text)
 
 	data := map[string]interface{}{
 		"Text":       question.text,
