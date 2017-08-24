@@ -41,7 +41,7 @@ func main() {
 		addr = ":8080"
 		host = "http://localhost" + addr
 	} else {
-		host = "https://social-transmission.herokuapp.com"
+		host = "https://sotrapp.herokuapp.com"
 	}
 
 	r := httprouter.New()
