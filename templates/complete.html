@@ -3,8 +3,7 @@
         <title>Congratulations</title>
     </head>
     <body>
-        <h1>Congratulations!</h1>
-        <p>You have completed Part 1 of the study. Here is your condition number: </p>
+        <p><strong>You have completed Part 1 of the study. Here is your condition number: </strong></p>
         <h3 id="cond"><strong>{{.Condition}}</strong></h3>
         <p><strong>It is important that you enter this number when prompted in the survey below:</strong></p>
         <a href="https://osu.az1.qualtrics.com/jfe/form/SV_3qhWighIhOcz7Zb">https://osu.az1.qualtrics.com/jfe/form/SV_3qhWighIhOcz7Zb</a>
@@ -17,10 +16,14 @@
 
     #cond {
         margin: 30px 20px 30px 20px;
-        font-size: 3em;
+        font-size: 3.25em;
     }
 
     body {
         padding: 7.5% 20% 10% 20%;
+    }
+
+    p, a {
+        font-size: 25px;
     }
 </style>
