@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"errors"
 
@@ -46,6 +47,11 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 
 	if err := rows.Scan(&r.wave, &r.id, &r.condition); err != nil {
 		return err
+	}
+
+	log.Println("Wave: ", r.wave, "Id: ", r.id, "Condition: ", r.condition, time.Now())
+	if r.condition == 0 {
+		return errors.New("response condition should not be zero")
 	}
 
 	rows, err = m.db.Query("SELECT s1, s2 FROM Questions WHERE response=$1", r.id)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"math/rand"
 )
@@ -9,11 +10,12 @@ var currWave int
 var res Response
 var currRes Response
 
-func GetResponse() {
+func GetResponse() error {
 	res = Response{wave: currWave}
 
 	if err := pgManager.GetRandomResponse(&res); err != nil {
 		log.Println("Error querying random row from postgres ", err)
+		return errors.New("unable to get valid random response")
 	}
 
 	if err := pgManager.MarkResponseAsUsed(res.id); err != nil {
@@ -21,6 +23,7 @@ func GetResponse() {
 	}
 
 	PopulateQuestions()
+	return nil
 }
 
 func Shuffle(slc []Question) {

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -27,8 +28,7 @@ func Intro(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := map[string]interface{}{
 		"Host": host,
 	}
-
-	GetResponse()
+	log.Println("Intro: ", time.Now())
 	t.templ.Execute(w, data)
 }
 
@@ -40,6 +40,11 @@ func Instructions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := map[string]interface{}{
 		"Host": host,
 	}
+
+	if err := GetResponse(); err != nil {
+		log.Println("Error getting response: ", err)
+	}
+	log.Println("Instructions: ", time.Now())
 	t.templ.Execute(w, data)
 }
 
@@ -56,7 +61,6 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		log.Println("Error converting string to int ", ps.ByName("q"), err)
 	}
 	question := res.questions[int(index)-1]
-	log.Println(question.text)
 
 	data := map[string]interface{}{
 		"Text":       question.text,
