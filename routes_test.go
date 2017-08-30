@@ -17,6 +17,7 @@ func TestIntro(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
+	currWave = 2
 	Intro(rr, req, httprouter.Params{})
 
 	if status := rr.Code; status != http.StatusOK {

@@ -16,9 +16,9 @@ func GetResponse() {
 		log.Println("Error querying random row from postgres ", err)
 	}
 
-	/*if err := pgManager.MarkResponseAsUsed(res.id); err != nil {
+	if err := pgManager.MarkResponseAsUsed(res.id); err != nil {
 		log.Println("Error marking id as used from postgres ", res.id, err)
-	}*/
+	}
 
 	PopulateQuestions()
 }
