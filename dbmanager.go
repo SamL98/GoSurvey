@@ -35,11 +35,10 @@ func (m *dbmanager) CheckConnection() (success bool, err error) {
 
 func (m *dbmanager) GetRandomResponse(r *Response) error {
 	rows, err := m.db.Query("SELECT wave, id, condition FROM Responses WHERE wave=$1 AND used=false ORDER BY random() LIMIT 1", r.wave)
-	defer rows.Close()
-
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if !rows.Next() {
 		return errors.New("zero rows from random response query")
@@ -50,11 +49,11 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 	}
 
 	rows, err = m.db.Query("SELECT s1, s2 FROM Questions WHERE response=$1", r.id)
-	defer rows.Close()
-
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
+
 	questions := []Question{}
 	i := 1
 	for rows.Next() {
