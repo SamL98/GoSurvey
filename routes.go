@@ -37,14 +37,24 @@ func Instructions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	data := map[string]interface{}{
-		"Host": host,
+
+	res := Response{}
+	GetResponse(&res)
+
+	currRes := Response{
+		wave:    currWave + 1,
+		targets: []Question{Question{}, Question{}, Question{}, Question{}},
 	}
 
-	if err := GetResponse(); err != nil {
-		log.Println("Error getting response: ", err)
-	}
+	sessionID++
+	responses[sessionID] = []Response{res, currRes}
+
 	log.Println("Instructions: ", time.Now())
+
+	data := map[string]interface{}{
+		"Host":    host,
+		"Session": sessionID,
+	}
 	t.templ.Execute(w, data)
 }
 
@@ -60,6 +70,19 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		w.Write([]byte("500 - Something went wrong. Sorry."))
 		log.Println("Error converting string to int ", ps.ByName("q"), err)
 	}
+	log.Println("query", r.URL.Query())
+	queryID := r.URL.Query().Get("session")
+	savedID, err := parseInt(queryID)
+	log.Println("session", savedID)
+	if err != nil {
+		log.Fatal("Unable to get session id")
+	}
+
+	if savedID <= 0 {
+		log.Fatal("Error retrieving session id")
+	}
+
+	res := responses[savedID][0]
 	question := res.questions[int(index)-1]
 
 	data := map[string]interface{}{
@@ -68,6 +91,7 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		"Distractor": question.distractor,
 		"Host":       host,
 		"NumQ":       len(res.questions),
+		"Session":    sessionID,
 	}
 
 	if !question.distractor {
@@ -83,6 +107,20 @@ func CompletionHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
+
+	queryID := r.URL.Query().Get("session")
+	if queryID != "" {
+		log.Fatal("Error retrieving session id")
+	}
+
+	savedID, err := parseInt(queryID)
+	if err != nil {
+		log.Fatal("Error parsing session id: ", err)
+	}
+
+	res := responses[savedID][0]
+	currRes := responses[savedID][1]
+
 	if err := pgManager.AddResponse(&currRes, res.id); err != nil {
 		log.Println("Error adding response to postgres", err)
 	}
@@ -127,7 +165,17 @@ func ParseInterest(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		}
 	}
 
-	currRes.targets[int(index)-1] = q
+	queryID := r.URL.Query().Get("session")
+	if queryID != "" {
+		log.Fatal("Error retrieving session id")
+	}
+
+	savedID, err := parseInt(queryID)
+	if err != nil {
+		log.Fatal("Error parsing session id: ", err)
+	}
+
+	(responses[savedID][1]).targets[int(index)-1] = q
 }
 
 func parseInt(str string) (result int, err error) {

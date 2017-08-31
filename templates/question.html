@@ -57,15 +57,15 @@
         var next = function() {
             if ('{{.Distractor}}' === 'false') {
                 var currNo = parseInt('{{.Number}}');
-                $.post('{{.Host}}/report_interest/' + currNo, "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
+                $.post('{{.Host}}/report_interest/' + currNo + '?session={{.Session}}', "\"interest\":" + (interest == null ? false : interest) + ",\"time\":" + (Date.now() - start));
             }
 
             var currIndex = parseInt('{{.Index}}');
             var nextNo = currIndex + 1;
-            var location = '{{.Host}}/question/' + nextNo;
+            var location = '{{.Host}}/question/' + nextNo + '?session={{.Session}}';
 
             if (nextNo > parseInt('{{.NumQ}}')) {
-                location = '{{.Host}}/completed';
+                location = '{{.Host}}/completed?session={{.Session}}';
             }
 
             window.location.href = location;

@@ -1,29 +1,24 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"math/rand"
 )
 
 var currWave int
-var res Response
-var currRes Response
 
-func GetResponse() error {
-	res = Response{wave: currWave}
+func GetResponse(res *Response) {
+	*res = Response{wave: currWave}
 
-	if err := pgManager.GetRandomResponse(&res); err != nil {
+	if err := pgManager.GetRandomResponse(res); err != nil {
 		log.Println("Error querying random row from postgres ", err)
-		return errors.New("unable to get valid random response")
 	}
 
 	if err := pgManager.MarkResponseAsUsed(res.id); err != nil {
 		log.Println("Error marking id as used from postgres ", res.id, err)
 	}
 
-	PopulateQuestions()
-	return nil
+	PopulateQuestions(res)
 }
 
 func Shuffle(slc []Question) {
@@ -35,7 +30,7 @@ func Shuffle(slc []Question) {
 	}
 }
 
-func PopulateQuestions() {
+func PopulateQuestions(res *Response) {
 	texts := [4]string{
 		"According to a recent poll, <span id=\"s1\"></span>% of Americans say that they would prefer working under a male boss. <span id=\"s2\"></span>% of Americans would prefer to work under a female boss.",
 		"Same sex marriage is a contested topic among Americans. In a poll conducted by the Pew Research Center, <span id=\"s1\"></span>% of respondents reported favoring same-sex marriage. <span id=\"s2\"></span>% reported opposing same-sex marriage.",

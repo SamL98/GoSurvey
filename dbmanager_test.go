@@ -92,8 +92,8 @@ func TestGetRandomResponseWithValidWave(t *testing.T) {
 		t.Error("GetRandomResponse should populate the given response's id with a non-negative integer.")
 	} else if r.condition < 0 {
 		t.Error("GetRandomResponse should populate the given response's condition with a non-negative integer.")
-	} else if len(r.questions) != 4 {
-		t.Error("GetRandomResponse should populate the given response with 4 questions.")
+	} else if len(r.targets) != 4 {
+		t.Error("GetRandomResponse should populate the given response with 4 target questions.")
 	} else {
 		for i := 0; i < len(r.questions); i++ {
 			q := r.questions[i]

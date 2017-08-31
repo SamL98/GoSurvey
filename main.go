@@ -31,10 +31,8 @@ func main() {
 	log.Println("Successfully connected to Postgres.")
 
 	currWave = 2
-	currRes = Response{
-		wave:    currWave + 1,
-		targets: []Question{Question{}, Question{}, Question{}, Question{}},
-	}
+	responses = make(map[int][]Response)
+	sessionID = 0
 
 	addr := ":" + envPort
 	if envPort == "" || envPort == "8080" {
