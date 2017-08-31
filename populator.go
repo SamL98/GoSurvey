@@ -23,7 +23,7 @@ func GetResponse(res *Response) {
 
 func Shuffle(slc []Question) {
 	for i := 1; i < len(slc); i++ {
-		r := rand.Intn(i + 1)
+		r := rand.Intn(len(slc))
 		if i != r {
 			slc[r], slc[i] = slc[i], slc[r]
 		}

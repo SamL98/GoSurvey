@@ -70,10 +70,10 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		w.Write([]byte("500 - Something went wrong. Sorry."))
 		log.Println("Error converting string to int ", ps.ByName("q"), err)
 	}
-	log.Println("query", r.URL.Query())
+
 	queryID := r.URL.Query().Get("session")
 	savedID, err := parseInt(queryID)
-	log.Println("session", savedID)
+
 	if err != nil {
 		log.Fatal("Unable to get session id")
 	}
@@ -109,13 +109,14 @@ func CompletionHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	})
 
 	queryID := r.URL.Query().Get("session")
-	if queryID != "" {
-		log.Fatal("Error retrieving session id")
+	savedID, err := parseInt(queryID)
+
+	if err != nil {
+		log.Fatal("Unable to get session id")
 	}
 
-	savedID, err := parseInt(queryID)
-	if err != nil {
-		log.Fatal("Error parsing session id: ", err)
+	if savedID <= 0 {
+		log.Fatal("Error retrieving session id")
 	}
 
 	res := responses[savedID][0]
@@ -166,13 +167,14 @@ func ParseInterest(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	}
 
 	queryID := r.URL.Query().Get("session")
-	if queryID != "" {
-		log.Fatal("Error retrieving session id")
+	savedID, err := parseInt(queryID)
+
+	if err != nil {
+		log.Fatal("Unable to get session id")
 	}
 
-	savedID, err := parseInt(queryID)
-	if err != nil {
-		log.Fatal("Error parsing session id: ", err)
+	if savedID <= 0 {
+		log.Fatal("Error retrieving session id")
 	}
 
 	(responses[savedID][1]).targets[int(index)-1] = q
