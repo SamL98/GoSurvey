@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 	"text/template"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -28,7 +27,7 @@ func Intro(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := map[string]interface{}{
 		"Host": host,
 	}
-	log.Println("Intro: ", time.Now())
+
 	t.templ.Execute(w, data)
 }
 
@@ -48,8 +47,6 @@ func Instructions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	sessionID++
 	responses[sessionID] = []Response{res, currRes}
-
-	log.Println("Instructions: ", time.Now())
 
 	data := map[string]interface{}{
 		"Host":    host,
@@ -83,6 +80,12 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	}
 
 	res := responses[savedID][0]
+
+	if int(index) > len(res.questions) {
+		log.Println(index, len(res.targets), len(res.questions))
+		log.Fatal("For some reason, the index: ", index, " is greater than the number of questions ", len(res.questions))
+	}
+
 	question := res.questions[int(index)-1]
 
 	data := map[string]interface{}{
@@ -121,6 +124,8 @@ func CompletionHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 
 	res := responses[savedID][0]
 	currRes := responses[savedID][1]
+
+	log.Println("COMPLETION. ID:", res.id, "Condition", res.condition)
 
 	if err := pgManager.AddResponse(&currRes, res.id); err != nil {
 		log.Println("Error adding response to postgres", err)

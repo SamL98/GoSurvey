@@ -10,7 +10,7 @@ var currWave int
 func GetResponse(res *Response) {
 	*res = Response{wave: currWave}
 
-	if err := pgManager.GetRandomResponse(res); err != nil {
+	if err := pgManager.GetRandomResponse(res, false); err != nil {
 		log.Println("Error querying random row from postgres ", err)
 	}
 

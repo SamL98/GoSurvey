@@ -23,7 +23,7 @@ func main() {
 	if success := pgManager.OpenConnection(); !success {
 		log.Fatal("Could not open connection to postgres")
 	}
-	defer pgManager.db.Close()
+	defer pgManager.CloseConnection()
 
 	if success, err := pgManager.CheckConnection(); !success || err != nil {
 		log.Fatal("Error pinging postgres ", err)

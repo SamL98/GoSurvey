@@ -15,6 +15,16 @@
 </html>
 <script>
     window.onload = function() {
+        document.onkeypress = (e => {
+            if (e.code == "Enter") {
+                if (interest == null || interest == undefined) {
+                    alert('Please select whether or not this post is interesting before moving on.');
+                    return;
+                }
+                next();
+            }
+        });
+
         var start = Date.now();
         var interest = null;
 

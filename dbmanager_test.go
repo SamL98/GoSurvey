@@ -59,7 +59,7 @@ func TestGetRandomResponseNoWave(t *testing.T) {
 	db := dbmanager{url: getEnv()["postgres_url"]}
 	db.OpenConnection()
 	r := Response{}
-	if err := db.GetRandomResponse(&r); err == nil {
+	if err := db.GetRandomResponse(&r, false); err == nil {
 		t.Error("GetRandomResponse error should not be nil without a valid wave.")
 	}
 }
@@ -68,7 +68,7 @@ func TestGetRandomResponseWithNegativeWave(t *testing.T) {
 	db := dbmanager{url: getEnv()["postgres_url"]}
 	db.OpenConnection()
 	r := Response{wave: -1}
-	if err := db.GetRandomResponse(&r); err == nil {
+	if err := db.GetRandomResponse(&r, false); err == nil {
 		t.Error("GetRandomResponse error should not be nil with a negative wave.")
 	}
 }
@@ -77,7 +77,7 @@ func TestGetRandomResponseWithLargeWave(t *testing.T) {
 	db := dbmanager{url: getEnv()["postgres_url"]}
 	db.OpenConnection()
 	r := Response{wave: 1000}
-	if err := db.GetRandomResponse(&r); err == nil {
+	if err := db.GetRandomResponse(&r, false); err == nil {
 		t.Error("GetRandomResponse error should not be nil with too large of a wave.")
 	}
 }
@@ -86,7 +86,7 @@ func TestGetRandomResponseWithValidWave(t *testing.T) {
 	db := dbmanager{url: getEnv()["postgres_url"]}
 	db.OpenConnection()
 	r := Response{wave: 2}
-	if err := db.GetRandomResponse(&r); err != nil {
+	if err := db.GetRandomResponse(&r, false); err != nil {
 		t.Error("GetRandomResponse should not return an error with a valid wave.")
 	} else if r.id < 0 {
 		t.Error("GetRandomResponse should populate the given response's id with a non-negative integer.")
@@ -111,6 +111,6 @@ func BenchmarkGetRandomResponse(b *testing.B) {
 	db.OpenConnection()
 	for i := 0; i < b.N; i++ {
 		res := Response{wave: 2}
-		db.GetRandomResponse(&res)
+		db.GetRandomResponse(&res, false)
 	}
 }

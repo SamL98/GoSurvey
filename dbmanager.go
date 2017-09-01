@@ -27,6 +27,12 @@ func (m *dbmanager) OpenConnection() bool {
 	return true
 }
 
+func (m *dbmanager) CloseConnection() {
+	if err := m.db.Close(); err != nil {
+		log.Println("Error closing postgres ", err)
+	}
+}
+
 func (m *dbmanager) CheckConnection() (success bool, err error) {
 	if err := m.db.Ping(); err != nil {
 		return false, err
@@ -34,22 +40,26 @@ func (m *dbmanager) CheckConnection() (success bool, err error) {
 	return true, nil
 }
 
-func (m *dbmanager) GetRandomResponse(r *Response) error {
-	rows, err := m.db.Query("SELECT wave, id, condition FROM Responses WHERE wave=$1 AND used=false ORDER BY random() LIMIT 1", r.wave)
+func (m *dbmanager) GetRandomResponse(r *Response, used bool) error {
+	rows, err := m.db.Query("SELECT wave, id, condition FROM Responses WHERE wave=$1 AND used=$2 ORDER BY random() LIMIT 1", r.wave, used)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
 	if !rows.Next() {
-		return errors.New("zero rows from random response query")
+		if used {
+			return errors.New("zero rows from random response query")
+		}
+		log.Println("All conditions are used, querying for used one.")
+		return m.GetRandomResponse(r, true)
 	}
 
 	if err := rows.Scan(&r.wave, &r.id, &r.condition); err != nil {
 		return err
 	}
 
-	log.Println("Wave: ", r.wave, "Id: ", r.id, "Condition: ", r.condition, time.Now())
+	log.Println("Wave:", r.wave, "Id:", r.id, "Condition:", r.condition, time.Now())
 	if r.condition == 0 {
 		return errors.New("response condition should not be zero")
 	}
@@ -76,8 +86,12 @@ func (m *dbmanager) GetRandomResponse(r *Response) error {
 }
 
 func (m *dbmanager) MarkResponseAsUsed(id int) error {
-	if _, err := m.db.Query("UPDATE Responses SET used = true WHERE id=$1", id); err != nil {
+	rows, err := m.db.Query("UPDATE Responses SET used = true WHERE id=$1", id)
+	if err != nil {
 		return err
+	}
+	if rows != nil {
+		rows.Close()
 	}
 	return nil
 }
@@ -97,7 +111,11 @@ func (m *dbmanager) AddResponse(r *Response, seed int) error {
 
 	for i := 0; i < len(r.targets); i++ {
 		q := r.targets[i]
-		if _, err := m.db.Query("INSERT INTO Questions (response, time, number, interest) VALUES ($1, $2, $3, $4)", id, q.time, int(q.number)-1, q.interest); err != nil {
+		insRows, err := m.db.Query("INSERT INTO Questions (response, time, number, interest) VALUES ($1, $2, $3, $4)", id, q.time, int(q.number)-1, q.interest)
+		if insRows != nil {
+			insRows.Close()
+		}
+		if err != nil {
 			return err
 		}
 	}
